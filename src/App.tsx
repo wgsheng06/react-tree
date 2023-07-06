@@ -24,7 +24,7 @@ const treeData: TreeData[] = [
       },
       {
         key: '1-2',
-        checked: true,
+        checked: false,
         expand: true,
         name: 'Tree Node 1-2',
         children: [
@@ -61,6 +61,8 @@ function App() {
         style={{
           width: '300px',
           border: '1px solid #222',
+          height: '500px',
+          overflow: 'auto',
         }}
       >
         <Tree data={treeData}></Tree>

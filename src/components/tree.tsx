@@ -35,10 +35,43 @@ const Tree: FC<Props> = ({ data }) => {
     setTreeKeyMap(buildKeyMap(_data));
   }, [_data]);
 
+  const onCheckedChildrenNode = (children: TreeData[], checked: boolean) => {
+    children.forEach((node) => {
+      node.checked = checked;
+      node.children && onCheckedChildrenNode(node.children, checked);
+    });
+  };
+
+  const onCheckedParentAll = (
+    parent: TreeData | null | undefined = null,
+    checked = false
+  ) => {
+    while (parent) {
+      parent.checked = (parent.children as TreeData[]).every(
+        (child) => child.checked
+      );
+      parent = parent.parent;
+    }
+  };
+  const onUnCheckedParent = (parent: TreeData | null | undefined = null) => {
+    while (parent) {
+      parent.checked = false;
+      parent = parent.parent;
+    }
+  };
+
   const onCheck = (key: string) => {
     const node = treeKeyMap[key];
     const checked = !node.checked;
     node.checked = checked;
+
+    if (checked) {
+      node.children && onCheckedChildrenNode(node.children, true);
+      onCheckedParentAll(node.parent, true);
+    } else {
+      node.children && onCheckedChildrenNode(node.children, false);
+      onUnCheckedParent(node.parent);
+    }
     setData([..._data]);
     return true;
   };

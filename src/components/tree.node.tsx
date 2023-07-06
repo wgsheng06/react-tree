@@ -19,7 +19,11 @@ const TreeNode: FC<Props> = ({ data, onCheck, onExpand }) => {
                   className={styles.icon}
                   onClick={() => onExpand && onExpand(node.key)}
                 >
-                  {node.expand ? <IconMdiAbTesting /> : 'expand'}
+                  {node.expand ? (
+                    <IconMdiArrowDownDropCircleOutline />
+                  ) : (
+                    <IconMdiArrowRightDropCircleOutline />
+                  )}
                 </div>
               ) : null}
               <div className={styles.icon}>
@@ -31,7 +35,7 @@ const TreeNode: FC<Props> = ({ data, onCheck, onExpand }) => {
               </div>
               <div className={styles.name}>{node.name}</div>
             </div>
-            {node.children ? (
+            {node.expand && node.children ? (
               <div className="node-children">
                 <TreeNode
                   data={node.children}

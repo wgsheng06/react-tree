@@ -5,6 +5,8 @@
 export {}
 declare global {
   const IconMdiAbTesting: typeof import('~icons/mdi/ab-testing')['default']
+  const IconMdiArrowDownDropCircleOutline: typeof import('~icons/mdi/arrow-down-drop-circle-outline')['default']
+  const IconMdiArrowRightDropCircleOutline: typeof import('~icons/mdi/arrow-right-drop-circle-outline')['default']
   const createRef: typeof import('react')['createRef']
   const forwardRef: typeof import('react')['forwardRef']
   const lazy: typeof import('react')['lazy']

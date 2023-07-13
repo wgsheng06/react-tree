@@ -5,7 +5,7 @@ interface Props {
   data: TreeData[];
 }
 
-type TreeKeyMap = Record<string, TreeData>;
+type TreeKeyMap = Record<TreeData['key'], TreeData>;
 
 /**
  * 序列化整颗树，方便遍历
@@ -31,10 +31,13 @@ const Tree: FC<Props> = ({ data }) => {
   const [treeKeyMap, setTreeKeyMap] = useState<TreeKeyMap>(map);
   const [_data, setData] = useState<TreeData[]>(data);
 
+  // 内部_data改变时，扁平化的树结构更新
   useEffect(() => {
     setTreeKeyMap(buildKeyMap(_data));
   }, [_data]);
 
+  // 当前被勾选时，所有子节点都应该被勾选
+  // 当前被取消勾选时，所有子节点都应该被取消勾选
   const onCheckedChildrenNode = (children: TreeData[], checked: boolean) => {
     children.forEach((node) => {
       node.checked = checked;
@@ -42,19 +45,24 @@ const Tree: FC<Props> = ({ data }) => {
     });
   };
 
-  const onCheckedParentAll = (
-    parent: TreeData | null | undefined = null,
-    checked = false
-  ) => {
-    while (parent) {
+  // 当前被勾选时，
+  // 深度所有父节点，并遍历其所有的子节点，判断该父节点是否充满
+  const onCheckedParentAll = (parent: TreeData | null | undefined = null) => {
+    // 这里通过!parent.checked进行了剪枝操作
+    // 如果某一层父节点已经是checked了，那么子节点的checked对其及其再往上的节点已经没有影响了
+    while (parent && !parent.checked) {
       parent.checked = (parent.children as TreeData[]).every(
         (child) => child.checked
       );
       parent = parent.parent;
     }
   };
+
+  // 当前被取消勾选时，所有父节点都应该被取消勾选
   const onUnCheckedParent = (parent: TreeData | null | undefined = null) => {
-    while (parent) {
+    // 这里通过parent.checked进行了剪枝操作
+    // 如果某一层父节点已经是!checked了，那么子节点的!checked对其及其再往上的节点已经没有影响了
+    while (parent && parent.checked) {
       parent.checked = false;
       parent = parent.parent;
     }
@@ -63,13 +71,19 @@ const Tree: FC<Props> = ({ data }) => {
   const onCheck = (key: string) => {
     const node = treeKeyMap[key];
     const checked = !node.checked;
+
+    // 这里先操作当前节点，这样后续操作其他节点时，可以不用管自身节点
     node.checked = checked;
 
     if (checked) {
+      // 操作所有子节点
       node.children && onCheckedChildrenNode(node.children, true);
-      onCheckedParentAll(node.parent, true);
+      // 操作所有父节点
+      onCheckedParentAll(node.parent);
     } else {
+      // 操作所有子节点
       node.children && onCheckedChildrenNode(node.children, false);
+      // 操作所有父节点
       onUnCheckedParent(node.parent);
     }
     setData([..._data]);
